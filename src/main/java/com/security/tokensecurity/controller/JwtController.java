@@ -4,10 +4,7 @@ import com.security.tokensecurity.controller.dto.TokenDto;
 import com.security.tokensecurity.service.jwtToken.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
@@ -19,9 +16,15 @@ public class JwtController {
     private final JwtService jwtService;
 
     @PostMapping("/signIn")
-    public TokenDto signIn(@RequestParam Map map){
+    public String signIn(@RequestParam Map map){
         //토큰발급하여 리턴
-        return jwtService.signIn(map);
+        TokenDto tokenDto = jwtService.signIn(map);
+        System.out.println("****************************************");
+        System.out.println("tokenDto :: " + tokenDto.getAccessToken());
+        System.out.println("tokenDto :: " + tokenDto.getRefreshToken());
+        System.out.println("tokenDto :: " + tokenDto.getGrantType());
+        System.out.println("****************************************");
+        return "성공";
     }
 
     @PostMapping("/vaild")

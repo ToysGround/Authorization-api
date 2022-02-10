@@ -16,6 +16,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,10 +34,10 @@ public class JwtService {
     private final JwtProvider jwtProvider;
     private final TokenTbRepository tokenTbRepository;
 
-    @Transactional
+    //@Transactional
     public TokenDto signIn(Map<String,String> map){
         String auth ="";
-
+        TokenDto tokenDto = null;
         switch (map.get("gourpNo")){
             case "1" : auth = "ROLE_USER";
                 break;
@@ -43,19 +45,39 @@ public class JwtService {
                 break;
             default: break;
         }
+        try {
+            GrantedAuthority authorities = new SimpleGrantedAuthority(Authority.valueOf(auth).name());
 
-        GrantedAuthority authorities = new SimpleGrantedAuthority(Authority.valueOf(auth).name());
-        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(map.get("uesrId"),map.get("userPwd"), Collections.singleton(authorities)) ;
-        Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
-        TokenDto tokenDto = jwtProvider.generateTokenDto(authentication);
+            UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(map.get("userId"),map.get("userPwd"), Collections.singleton(authorities)) ;
+//            UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+//                    userDetails,
+//                    userDetails.getPassword(),
+//                    userDetails.getAuthorities()
+//            ) ;
+//            System.out.println("***************************************************************************************");
+//            System.out.println("authenticationToken.getName() :: " + authenticationToken.getName());
+//            System.out.println("authenticationToken.getCredentials() :: " + authenticationToken.getCredentials());
+//            System.out.println("authenticationToken.getPrincipal() :: " + authenticationToken.getPrincipal());
+//            System.out.println("authenticationToken.getAuthorities() :: " + authenticationToken.getAuthorities());
+//            System.out.println("authenticationToken.getDetails() :: " + authenticationToken.getDetails());
+//            System.out.println("***************************************************************************************");
+//            Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
+            Authentication authentication = authenticationToken;
+            tokenDto = jwtProvider.generateTokenDto(authentication);
 
-        TokenTb tokenEntity = new TokenTb();
+            TokenTb tokenEntity = new TokenTb();
 
-       // tokenEntity.setHashKey(Com.changeHashMd5(authenticationToken.getName())+map.get("gourpNo"));
-        tokenEntity.setHashKey(Com.changeHashMd5(authenticationToken.getName()+map.get("gourpNo")));
-        tokenEntity.setGourpNo(map.get("gourpNo"));
+            // tokenEntity.setHashKey(Com.changeHashMd5(authenticationToken.getName())+map.get("gourpNo"));
+            tokenEntity.setHashKey(Com.changeHashMd5(authenticationToken.getName()+map.get("gourpNo")));
+            tokenEntity.setRefreshToken(tokenDto.getRefreshToken());
+            tokenEntity.setGourpNo(map.get("gourpNo"));
 
-        tokenTbRepository.save(tokenEntity);
+            tokenTbRepository.save(tokenEntity);
+        }catch (Exception e){
+            e.printStackTrace();
+            return null;
+        }
+
 
         return tokenDto;
     }

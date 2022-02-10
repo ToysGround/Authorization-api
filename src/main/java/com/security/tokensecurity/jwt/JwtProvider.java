@@ -32,7 +32,7 @@ import javax.servlet.http.HttpServletRequest;
 public class JwtProvider {
 
     final String URL_LOCAL = "http://localhost:8080/user/searchId";
-    private String secretKey = "wlsghks"; //시크릿키 다른방법으로 설정하는거 생각해야함
+    private String secretKey = "813c63d772d045efbe07eefe3227e51e"; //시크릿키 다른방법으로 설정하는거 생각해야함
     private final long ACCESS_TOKEN_VALID_TIME = 30 * 60 * 1000L; // 30분
     private final long REFRESH_TOKEN_VALID_TIME = 24 * 60 * 60 * 1000L; // 24시간
     private static final String AUTHORITIES_KEY = "auth";
