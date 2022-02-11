@@ -16,8 +16,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,7 +32,6 @@ public class JwtService {
     private final JwtProvider jwtProvider;
     private final TokenTbRepository tokenTbRepository;
 
-    //@Transactional
     public TokenDto signIn(Map<String,String> map){
         String auth ="";
         TokenDto tokenDto = null;
@@ -49,35 +46,23 @@ public class JwtService {
             GrantedAuthority authorities = new SimpleGrantedAuthority(Authority.valueOf(auth).name());
 
             UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(map.get("userId"),map.get("userPwd"), Collections.singleton(authorities)) ;
-//            UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-//                    userDetails,
-//                    userDetails.getPassword(),
-//                    userDetails.getAuthorities()
-//            ) ;
-//            System.out.println("***************************************************************************************");
-//            System.out.println("authenticationToken.getName() :: " + authenticationToken.getName());
-//            System.out.println("authenticationToken.getCredentials() :: " + authenticationToken.getCredentials());
-//            System.out.println("authenticationToken.getPrincipal() :: " + authenticationToken.getPrincipal());
-//            System.out.println("authenticationToken.getAuthorities() :: " + authenticationToken.getAuthorities());
-//            System.out.println("authenticationToken.getDetails() :: " + authenticationToken.getDetails());
-//            System.out.println("***************************************************************************************");
-//            Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
+
             Authentication authentication = authenticationToken;
-            tokenDto = jwtProvider.generateTokenDto(authentication);
+            String hashKey = Com.changeHashMd5(authenticationToken.getName()+map.get("gourpNo"));
+            tokenDto = jwtProvider.generateTokenDto(authentication, hashKey);
 
             TokenTb tokenEntity = new TokenTb();
 
-            // tokenEntity.setHashKey(Com.changeHashMd5(authenticationToken.getName())+map.get("gourpNo"));
-            tokenEntity.setHashKey(Com.changeHashMd5(authenticationToken.getName()+map.get("gourpNo")));
+            tokenEntity.setHashKey(hashKey);
             tokenEntity.setRefreshToken(tokenDto.getRefreshToken());
             tokenEntity.setGourpNo(map.get("gourpNo"));
 
             tokenTbRepository.save(tokenEntity);
+
         }catch (Exception e){
             e.printStackTrace();
             return null;
         }
-
 
         return tokenDto;
     }
@@ -117,7 +102,7 @@ public class JwtService {
 
         String accessToken = jwtProvider.createJwtAccessToken(map.get("userId"),authorities);
 
-        TokenDto tokenDto =jwtProvider.generateTokenDto(accessToken, refreshToken);
+        TokenDto tokenDto =jwtProvider.generateTokenDto(accessToken, refreshToken, map.get("refreshKey"));
 
         return tokenDto;
     }
@@ -127,7 +112,7 @@ public class JwtService {
         String refreshTokenValue = UUID.randomUUID().toString().replace("-", "");
         String refreshToken = jwtProvider.createJwtRefreshToken(refreshTokenValue);
 
-        TokenDto tokenDto =jwtProvider.generateTokenDto("",refreshToken);
+        TokenDto tokenDto =jwtProvider.generateTokenDto("",refreshToken,tokenEntity.getHashKey());
 
         tokenEntity.setRefreshToken(refreshToken);
         tokenTbRepository.save(tokenEntity);

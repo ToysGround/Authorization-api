@@ -44,7 +44,7 @@ public class JwtProvider {
         secretKey = Base64.getEncoder().encodeToString(secretKey.getBytes());
     }
 
-    public TokenDto generateTokenDto(Authentication authentication){
+    public TokenDto generateTokenDto(Authentication authentication,String refreshTokenKey){
         String authorities = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(","));
@@ -57,14 +57,16 @@ public class JwtProvider {
                 .grantType(BEARER_TYPE)
                 .accessToken(accToken)
                 .refreshToken(reToken)
+                .refreshTokenKey(refreshTokenKey)
                 .build();
     }
 
-    public TokenDto generateTokenDto(String accessToken, String refreshToken){
+    public TokenDto generateTokenDto(String accessToken, String refreshToken,String refreshTokenKey){
         return TokenDto.builder()
                 .grantType(BEARER_TYPE)
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
+                .refreshTokenKey(refreshTokenKey)
                 .build();
     }
 

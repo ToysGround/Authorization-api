@@ -16,15 +16,16 @@ public class JwtController {
     private final JwtService jwtService;
 
     @PostMapping("/signIn")
-    public String signIn(@RequestParam Map map){
+    public TokenDto signIn(@RequestParam Map map){
         //토큰발급하여 리턴
         TokenDto tokenDto = jwtService.signIn(map);
         System.out.println("****************************************");
         System.out.println("tokenDto :: " + tokenDto.getAccessToken());
         System.out.println("tokenDto :: " + tokenDto.getRefreshToken());
+        System.out.println("tokenDto :: " + tokenDto.getRefreshTokenKey());
         System.out.println("tokenDto :: " + tokenDto.getGrantType());
         System.out.println("****************************************");
-        return "성공";
+        return tokenDto;
     }
 
     @PostMapping("/vaild")
