@@ -35,7 +35,7 @@ public class JwtService {
     public TokenDto signIn(Map<String,String> map){
         String auth ="";
         TokenDto tokenDto = null;
-        switch (map.get("gourpNo")){
+        switch (map.get("serviceNo")){
             case "1" : auth = "ROLE_USER";
                 break;
             case "2" : auth = "ROLE_ADMIN";
@@ -48,14 +48,14 @@ public class JwtService {
             UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(map.get("userId"),map.get("userPwd"), Collections.singleton(authorities)) ;
 
             Authentication authentication = authenticationToken;
-            String hashKey = Com.changeHashMd5(authenticationToken.getName()+map.get("gourpNo"));
+            String hashKey = Com.changeHashMd5(authenticationToken.getName()+map.get("serviceNo"));
             tokenDto = jwtProvider.generateTokenDto(authentication, hashKey);
 
             TokenTb tokenEntity = new TokenTb();
 
             tokenEntity.setHashKey(hashKey);
             tokenEntity.setRefreshToken(tokenDto.getRefreshToken());
-            tokenEntity.setGourpNo(map.get("gourpNo"));
+            tokenEntity.setGourpNo(map.get("serviceNo"));
 
             tokenTbRepository.save(tokenEntity);
 
