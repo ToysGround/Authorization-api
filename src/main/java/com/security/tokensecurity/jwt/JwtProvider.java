@@ -98,9 +98,7 @@ public class JwtProvider {
                 .compact();
     }
 
-    public String resolveJwtToken(HttpServletRequest request){
-        return request.getHeader("Authorization");
-    }
+    public String resolveJwtToken(HttpServletRequest request){return request.getHeader("Authorization").split(" ")[1]; }
 
     public Authentication getAuthentication(String token){
         Jws<Claims> claims = getClaimsFromJwtToken(token);

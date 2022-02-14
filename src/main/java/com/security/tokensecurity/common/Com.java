@@ -1,8 +1,16 @@
 package com.security.tokensecurity.common;
 
 import java.security.MessageDigest;
+import java.util.HashMap;
 
 public class Com {
+    public static HashMap<String,Object> inputMap(boolean success, String message, Object data){
+        HashMap<String, Object> map = new HashMap<>();
+        map.put("success", success);
+        map.put("message", message);
+        map.put("data", data);
+        return map;
+    }
     public static String changeHashMd5(String value){
         String result = "";
         try{
