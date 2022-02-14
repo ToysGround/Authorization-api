@@ -1,16 +1,11 @@
 package com.security.tokensecurity.controller;
 
-import com.security.tokensecurity.common.Com;
 import com.security.tokensecurity.controller.dto.TokenDto;
-import com.security.tokensecurity.jwt.JwtProvider;
+
 import com.security.tokensecurity.service.jwtToken.JwtService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
-import java.util.HashMap;
 import java.util.Map;
 
 @RequestMapping("/jwt")
@@ -34,8 +29,9 @@ public class JwtController {
     }
 
     @PostMapping("/refresh")
-    public TokenDto refresh(@RequestParam Map map){
+    public TokenDto refresh(@RequestBody Map map){
         //REFRESH TOKEN 재발급하여 리턴
+        System.out.println("MAP :: " + map.toString());
         return jwtService.reissueAccessToken(map);
     }
 }

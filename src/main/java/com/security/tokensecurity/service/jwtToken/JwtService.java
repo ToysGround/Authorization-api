@@ -72,7 +72,15 @@ public class JwtService {
 
     @Transactional(readOnly = true)
     public TokenDto reissueAccessToken(Map<String,String> map){
-        TokenTb tokenEntity = tokenTbRepository.findByHashKey(map.get("refreshKey"));
+        String match = "[^\uAC00-\uD7A3xfe0-9a-zA-Z\\s]";
+        System.out.println("map :: "+ map.toString());
+        String mapRefreshTokenKey = String.valueOf(map.get("refreshTokenKey")).replaceAll(match," ").trim();
+        String mapAccessToken = String.valueOf(map.get("accessToken")).replaceAll("\\[","").replaceAll("\\]","");
+        System.out.println("refreshTokenKey ::" +mapRefreshTokenKey);
+        System.out.println("mapAccessToken ::" +mapAccessToken);
+
+        TokenTb tokenEntity = tokenTbRepository.findByHashKey(mapRefreshTokenKey);
+        String userId = jwtProvider.getUserId(mapAccessToken);
         String refreshToken = "";
 
         if (tokenEntity == null){
@@ -82,25 +90,28 @@ public class JwtService {
         if(!jwtProvider.isTokenValid(tokenEntity.getRefreshToken())){
             throw new RuntimeException("Refresh Token이 유효하지 않습니다.");
         }
-        if(!tokenEntity.getRefreshToken().equals(map.get("userId"))){
+       /* 토큰 테이블에 유저정보는 관리안함
+        if(!tokenEntity.getRefreshToken().equals(userId)){
             throw new RuntimeException("토큰의 유저 정보가 일치하지 않습니다.");
-        }
+        }*/
 
-        Authentication authentication = jwtProvider.getAuthentication(map.get("accessToken"));
+        Authentication authentication = jwtProvider.getAuthentication(mapAccessToken);
+        map.put("refreshToken",tokenEntity.getRefreshToken());
 
+        /* 해당부분 사용할 시 리프레쉬 토큰 복호화 생각해보고 결정해야함
         if(checkExpired(map)){
-            refreshToken = reissueRefreshToken(map.get("userId"),tokenEntity).getRefreshToken();
+            refreshToken = reissueRefreshToken(userId,tokenEntity).getRefreshToken();
         }else{
             refreshToken = tokenEntity.getRefreshToken();
-        }
-
+        }*/
+        refreshToken = tokenEntity.getRefreshToken();
         String authorities = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(","));
 
-        String accessToken = jwtProvider.createJwtAccessToken(map.get("userId"),authorities);
+        String accessToken = jwtProvider.createJwtAccessToken(userId,authorities);
 
-        TokenDto tokenDto =jwtProvider.generateTokenDto(accessToken, refreshToken, map.get("refreshKey"));
+        TokenDto tokenDto =jwtProvider.generateTokenDto(accessToken, refreshToken, mapRefreshTokenKey);
 
         return tokenDto;
     }
@@ -119,8 +130,17 @@ public class JwtService {
     }
 
     public boolean checkExpired(Map<String, String> map){
-        Jws<Claims> claimsAcc = jwtProvider.getClaimsFromJwtToken(map.get("accessToken"));
-        Jws<Claims> claimsRef = jwtProvider.getClaimsFromJwtToken(map.get("refreshToken"));
+        System.out.println("map :: " + String.valueOf(map.get("accessToken")));
+        String match = "[^\uAC00-\uD7A3xfe0-9a-zA-Z\\s]";
+        //System.out.println("map :: "+ map.toString());
+        String mapAccessToken = String.valueOf(map.get("accessToken")).replaceAll("\\[","").replaceAll("\\]","");
+        String mapRefreshToken = String.valueOf(map.get("refreshToken")).replaceAll(match," ").trim();
+
+
+        Jws<Claims> claimsAcc = jwtProvider.getClaimsFromJwtToken(mapAccessToken);
+        System.out.println("*************************************************************");
+        Jws<Claims> claimsRef = jwtProvider.getClaimsFromJwtToken(mapRefreshToken);
+        System.out.println("*************************************************************");
         Date accDt = claimsAcc.getBody().getExpiration();
         Date reDt = claimsRef.getBody().getExpiration();
         long accessDt = accDt.getTime();

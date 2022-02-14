@@ -73,6 +73,7 @@ public class JwtProvider {
     public String createJwtAccessToken(String userId, String roles){
         Claims claims  = Jwts.claims().setSubject(userId);
         claims.put("roles", roles);
+        claims.put(AUTHORITIES_KEY,roles);
         Date now = new Date();
         Date expiration = new Date(now.getTime() + ACCESS_TOKEN_VALID_TIME);
 
@@ -102,12 +103,14 @@ public class JwtProvider {
 
     public Authentication getAuthentication(String token){
         Jws<Claims> claims = getClaimsFromJwtToken(token);
-        if(claims.getBody().get(secretKey) == null){
+        System.out.println("claims :: " + claims.getBody().toString());
+        System.out.println("claims :: " + claims.getBody().get(AUTHORITIES_KEY));
+        if(claims.getBody().get(AUTHORITIES_KEY) == null){
             throw new RuntimeException("권한 정보가 없는 토큰입니다.");
         }
 
         Collection<? extends GrantedAuthority> authorities =
-                Arrays.stream(claims.getBody().get(secretKey).toString().split(","))
+                Arrays.stream(claims.getBody().get(AUTHORITIES_KEY).toString().split(","))
                         .map(SimpleGrantedAuthority::new)
                         .collect(Collectors.toList());
 
@@ -117,6 +120,7 @@ public class JwtProvider {
     }
 
     public String getUserId(String token){
+        System.out.println("getClaimsFromJwtToken(token).getBody().getSubject() :: " + getClaimsFromJwtToken(token).getBody().getSubject());
         return getClaimsFromJwtToken(token).getBody().getSubject();
     }
 
@@ -137,7 +141,11 @@ public class JwtProvider {
     }
 
     public Jws<Claims> getClaimsFromJwtToken(String jwtToken){
-        return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(jwtToken);
+        System.out.println("jwtToken :: " + jwtToken);
+        return Jwts.parserBuilder()
+                .setSigningKey(secretKey)
+                .build()
+                .parseClaimsJws(jwtToken);
     }
 
     public String getUserEntity(){
