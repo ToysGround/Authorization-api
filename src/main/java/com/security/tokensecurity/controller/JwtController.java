@@ -34,7 +34,7 @@ public class JwtController {
     }
 
     @PostMapping("/refresh")
-    public TokenDto refresh(@RequestBody Map map){
+    public TokenDto refresh(@RequestParam Map map){
         //REFRESH TOKEN 재발급하여 리턴
         return jwtService.reissueAccessToken(map);
     }
