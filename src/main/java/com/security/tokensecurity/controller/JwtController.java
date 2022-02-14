@@ -39,7 +39,7 @@ public class JwtController {
         //REFRESH TOKEN 재발급하여 리턴
         Map<String, String> data = new HashMap<>();
         data.putAll(map);
-        data.put("accessToken", jwtProvider.resolveJwtToken(request));
+        data.put("accessToken", jwtProvider.resolveJwtToken(request).split(" ")[1]);
         TokenDto tokenDto = jwtService.reissueAccessToken(data);
         return new ResponseEntity<>(Com.inputMap(true,"TOKEN 발급 성공.",tokenDto.getAccessToken()), HttpStatus.OK); //200
     }
