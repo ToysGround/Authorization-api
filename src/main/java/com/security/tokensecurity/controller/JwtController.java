@@ -19,7 +19,6 @@ import java.util.Map;
 public class JwtController {
 
     private final JwtService jwtService;
-    private final JwtProvider jwtProvider;
 
     @PostMapping("/signIn")
     public TokenDto signIn(@RequestParam Map map){
@@ -35,12 +34,8 @@ public class JwtController {
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<?> refresh(@RequestBody Map map, HttpServletRequest request){
+    public TokenDto refresh(@RequestBody Map map){
         //REFRESH TOKEN 재발급하여 리턴
-        Map<String, String> data = new HashMap<>();
-        data.putAll(map);
-        data.put("accessToken", jwtProvider.resolveJwtToken(request).split(" ")[1]);
-        TokenDto tokenDto = jwtService.reissueAccessToken(data);
-        return new ResponseEntity<>(Com.inputMap(true,"TOKEN 발급 성공.",tokenDto.getAccessToken()), HttpStatus.OK); //200
+        return jwtService.reissueAccessToken(map);
     }
 }
