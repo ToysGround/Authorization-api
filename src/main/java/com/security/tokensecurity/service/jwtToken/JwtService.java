@@ -67,9 +67,8 @@ public class JwtService {
         return tokenDto;
     }
 
-    @Transactional(readOnly = true)
-    public boolean vaildToken(){
-        return false;
+    public boolean vaildToken(String token) {
+        return jwtProvider.isTokenValid(token);
     }
 
     @Transactional(readOnly = true)

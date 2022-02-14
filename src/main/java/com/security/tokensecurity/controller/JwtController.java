@@ -29,13 +29,13 @@ public class JwtController {
     }
 
     @PostMapping("/vaild")
-    public String vaild(){
+    public Boolean vaild(@RequestParam String token){
         //토큰 검증
-        return null;
+        return jwtService.vaildToken(token);
     }
 
     @PostMapping("/refresh")
-    public void refresh(){
+    public void refresh(@RequestParam String token){
         //REFRESH TOKEN 재발급하여 리턴
     }
 }
