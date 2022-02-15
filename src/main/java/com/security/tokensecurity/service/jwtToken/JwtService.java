@@ -157,4 +157,8 @@ public class JwtService {
        return tokenTbRepository.deleteByHashKey(hashKey);
     }
 
+    public TokenTb findByHashKey(String hashKey){
+        return tokenTbRepository.findByHashKey(hashKey);
+    }
+
 }

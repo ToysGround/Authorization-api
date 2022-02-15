@@ -42,4 +42,12 @@ public class JwtController {
         }
         return false;
     }
+
+    @PostMapping("/checkRefresh")
+    public boolean checkRefreshToken(@RequestBody Map map){
+        if(jwtService.findByHashKey(map.get("refreshTokenKey").toString()) == null){
+            return true;
+        }
+        return false;
+    }
 }
