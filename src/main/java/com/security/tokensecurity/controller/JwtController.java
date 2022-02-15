@@ -34,4 +34,12 @@ public class JwtController {
         System.out.println("MAP :: " + map.toString());
         return jwtService.reissueAccessToken(map);
     }
+
+    @PostMapping("/signOut")
+    public boolean signOut(@RequestBody Map map){
+        if(jwtService.deleteByhashKey(map.get("refreshTokenKey").toString()) == null){
+            return true;
+        }
+        return false;
+    }
 }

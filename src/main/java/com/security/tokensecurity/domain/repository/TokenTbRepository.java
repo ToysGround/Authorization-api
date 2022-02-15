@@ -9,4 +9,7 @@ public interface TokenTbRepository extends JpaRepository<TokenTb, Long> {
     @Query("select t from TokenTb t where t.hashKey = :target")
     TokenTb findByHashKey(@Param("target") String hashKey);
 
+    @Query("delete from TokenTb t where t.hashKey = :target")
+    TokenTb deleteByHashKey(@Param("target") String hashKey);
+
 }

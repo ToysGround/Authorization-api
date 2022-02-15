@@ -47,7 +47,8 @@ public class JwtService {
             UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(map.get("userId"),map.get("userPwd"), Collections.singleton(authorities)) ;
 
             Authentication authentication = authenticationToken;
-            String hashKey = Com.changeHashMd5(authenticationToken.getName()+map.get("serviceNo"));
+
+            String hashKey = Com.changeHashMd5(authenticationToken.getName()+map.get("serviceNo")+((Math.random()*10000)+1));
             tokenDto = jwtProvider.generateTokenDto(authentication, hashKey);
 
             TokenTb tokenEntity = new TokenTb();
@@ -150,6 +151,10 @@ public class JwtService {
         }else{
             return false;
         }
+    }
+
+    public TokenTb deleteByhashKey(String hashKey){
+       return tokenTbRepository.deleteByHashKey(hashKey);
     }
 
 }
