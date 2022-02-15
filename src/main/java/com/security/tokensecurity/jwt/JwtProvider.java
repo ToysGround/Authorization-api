@@ -51,7 +51,7 @@ public class JwtProvider {
         String refreshTokenValue = UUID.randomUUID().toString().replace("-", "");
 
         String accToken = createJwtAccessToken(authentication.getName(),authorities);
-        String reToken = createJwtRefreshToken(refreshTokenValue);
+        String reToken = createJwtRefreshToken(authentication.getName(),refreshTokenValue);
 
         return TokenDto.builder()
                 .grantType(BEARER_TYPE)
@@ -85,8 +85,8 @@ public class JwtProvider {
                 .compact();
     }
 
-    public String createJwtRefreshToken(String value){
-        Claims claims = Jwts.claims();
+    public String createJwtRefreshToken(String userId, String value){
+        Claims claims = Jwts.claims().setSubject(userId);
         claims.put("value",value);
         Date now = new Date();
         Date expiration = new Date(now.getTime() + REFRESH_TOKEN_VALID_TIME);

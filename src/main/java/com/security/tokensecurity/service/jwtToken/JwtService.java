@@ -44,7 +44,7 @@ public class JwtService {
         try {
             GrantedAuthority authorities = new SimpleGrantedAuthority(Authority.valueOf(auth).name());
 
-            UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(map.get("userId"),map.get("userPwd"), Collections.singleton(authorities)) ;
+            UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(map.get("userId"),map.get("userPwd"), Collections.singleton(authorities));
 
             Authentication authentication = authenticationToken;
 
@@ -81,14 +81,15 @@ public class JwtService {
         System.out.println("mapAccessToken ::" +mapAccessToken);
 
         TokenTb tokenEntity = tokenTbRepository.findByHashKey(mapRefreshTokenKey);
-        String userId = jwtProvider.getUserId(mapAccessToken);
-        String refreshToken = "";
+        String refreshToken = tokenEntity.getRefreshToken();;
+        String userId = jwtProvider.getUserId(refreshToken);
+
 
         if (tokenEntity == null){
             throw new RuntimeException("조회된 토큰이 업습니다.");
         }
 
-        if(!jwtProvider.isTokenValid(tokenEntity.getRefreshToken())){
+        if(!jwtProvider.isTokenValid(refreshToken)){
             throw new RuntimeException("Refresh Token이 유효하지 않습니다.");
         }
        /* 토큰 테이블에 유저정보는 관리안함
@@ -96,8 +97,8 @@ public class JwtService {
             throw new RuntimeException("토큰의 유저 정보가 일치하지 않습니다.");
         }*/
 
-        Authentication authentication = jwtProvider.getAuthentication(mapAccessToken);
-        map.put("refreshToken",tokenEntity.getRefreshToken());
+        Authentication authentication = jwtProvider.getAuthentication(refreshToken);
+        map.put("refreshToken",refreshToken);
 
         /* 해당부분 사용할 시 리프레쉬 토큰 복호화 생각해보고 결정해야함
         if(checkExpired(map)){
@@ -105,7 +106,6 @@ public class JwtService {
         }else{
             refreshToken = tokenEntity.getRefreshToken();
         }*/
-        refreshToken = tokenEntity.getRefreshToken();
         String authorities = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(","));
@@ -120,7 +120,7 @@ public class JwtService {
     @Transactional
     public TokenDto reissueRefreshToken(String userId, TokenTb tokenEntity){
         String refreshTokenValue = UUID.randomUUID().toString().replace("-", "");
-        String refreshToken = jwtProvider.createJwtRefreshToken(refreshTokenValue);
+        String refreshToken = jwtProvider.createJwtRefreshToken(userId,refreshTokenValue);
 
         TokenDto tokenDto =jwtProvider.generateTokenDto("",refreshToken,tokenEntity.getHashKey());
 
