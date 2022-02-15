@@ -120,7 +120,7 @@ public class JwtService {
     @Transactional
     public TokenDto reissueRefreshToken(String userId, TokenTb tokenEntity){
         String refreshTokenValue = UUID.randomUUID().toString().replace("-", "");
-        String refreshToken = jwtProvider.createJwtRefreshToken(userId,refreshTokenValue);
+        String refreshToken = jwtProvider.createJwtRefreshToken(userId,refreshTokenValue,"ADMIN");
 
         TokenDto tokenDto =jwtProvider.generateTokenDto("",refreshToken,tokenEntity.getHashKey());
 
