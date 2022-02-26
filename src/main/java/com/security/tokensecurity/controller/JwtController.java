@@ -50,4 +50,7 @@ public class JwtController {
         }
         return false;
     }
+
+    @PostMapping("/getUser")
+    public String getUser(@RequestParam String token){ return jwtService.getUser(token);}
 }

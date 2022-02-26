@@ -161,4 +161,6 @@ public class JwtService {
         return tokenTbRepository.findByHashKey(hashKey);
     }
 
+    public String getUser(String token){return jwtProvider.getUserId(token);}
+
 }
